@@ -6,6 +6,7 @@ const app = express();
 const qs = require('qs');
 const assert = require('assert');
 const dotenv = require("dotenv");
+const _ = require("lodash");
 
 app.set("view engine", "ejs");
 
@@ -25,14 +26,7 @@ const profileSchema = {
     name: String,
     gender: String,
     company: String,
-    email: {
-        type: String,
-        validate(value){
-            if (value.includes(company)){
-                throw new Error("Invalid email");
-            }
-        }
-    },
+    email: String,
     phone :String,
     address: String,
     about: String,
@@ -71,6 +65,7 @@ app.route("/profiles")
         });
     })
     .post(function(req, res){
+
         const newProfile = new Profile({
             guid: req.body.guid,
             isActive: req.body.activity,
@@ -98,6 +93,9 @@ app.route("/profiles")
             }
             else{
                 res.send(err);
+            }
+            if (!value.includes(_.lowerCase(company))){
+                res.send("Invalid Email.");
             }
         });
     })
