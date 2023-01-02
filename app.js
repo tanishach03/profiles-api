@@ -95,7 +95,7 @@ app.route("/profiles")
                 res.send(err);
             }
             if (!value.includes(_.lowerCase(company))){
-                res.send("Invalid Email.");
+                throw new Error("Invalid email");
             }
         });
     })
