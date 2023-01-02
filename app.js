@@ -113,7 +113,17 @@ app.route("/profiles")
     });
 
 
-
+//Sorting the profiles based on their genders
+app.get("/profiles/:gender", function (req, res) {
+    Profile.find({gender: req.params.gender}, function(err, foundGender){
+        if (foundGender){
+            res.send(foundGender);
+        }
+        else{
+            res.send("No profiles matching that gender were found.");
+        }
+    })
+})
 
 
 //Requests targeting specific profile(s)
