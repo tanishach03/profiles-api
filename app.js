@@ -7,6 +7,7 @@ const qs = require('qs');
 const assert = require('assert');
 const dotenv = require("dotenv");
 const _ = require("lodash");
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 app.set("view engine", "ejs");
 
@@ -17,7 +18,7 @@ mongoose.set('strictQuery', true);
 mongoose.connect("mongodb+srv://admin:1234@cluster0.dib21mu.mongodb.net/profilesDB");
 
 const profileSchema = {
-    guide: String,
+    guid: String,
     isActive: Boolean,
     balance: String,
     picture: String,
@@ -50,7 +51,15 @@ const profileSchema = {
     greeting: String
 } 
 
+profileSchema.set('validateBeforeSave', false);
+schema.path('email').validate(function (value) {
+    const validate = value.includes(_.lowerCase(req.body.company));
+});
+// profileSchema.plugin(mongoosePaginate);
+
 const Profile = new mongoose.model("Profile", profileSchema);
+
+// Profile.paginate().then({});
 
 //Requests targeting all the profiles
 app.route("/profiles")
@@ -94,7 +103,7 @@ app.route("/profiles")
             else{
                 res.send(err);
             }
-            if (!value.includes(_.lowerCase(company))){
+            if (!req.body.email.includes(_.lowerCase(req.body.company))){
                 throw new Error("Invalid email");
             }
         });
