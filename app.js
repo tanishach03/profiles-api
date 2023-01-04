@@ -8,6 +8,9 @@ const assert = require('assert');
 const dotenv = require("dotenv");
 const _ = require("lodash");
 const mongoosePaginate = require("mongoose-paginate-v2");
+const {Schema, model} = mongoose;
+
+let employeeCompany = " ";
 
 app.set("view engine", "ejs");
 
@@ -17,7 +20,12 @@ app.use(bodyParser.urlencoded({extended:true}));
 mongoose.set('strictQuery', true);
 mongoose.connect("mongodb+srv://admin:1234@cluster0.dib21mu.mongodb.net/profilesDB");
 
-const profileSchema = {
+const mySubschema = new Schema({
+    id: Number,
+    name: String,
+});
+
+const profileSchema = new Schema({
     guid: String,
     isActive: Boolean,
     balance: String,
@@ -27,7 +35,13 @@ const profileSchema = {
     name: String,
     gender: String,
     company: String,
-    email: String,
+    email: {
+        type: String,
+        validate(value){
+            if (!value.includes(_.lowerCase(employeeCompany))){
+                throw new Error("Invalid Email!");
+        }
+    }},
     phone :String,
     address: String,
     about: String,
@@ -37,25 +51,13 @@ const profileSchema = {
     tags: [
         {
           type: {
-            type: { type: String }
+            type: String
           }
-        }
+        },
       ],
-    friends: [
-        {
-          type: {
-            type: { type: String }
-          }
-        }
-      ], 
+    friends: [mySubschema],
     greeting: String
-} 
-
-profileSchema.set('validateBeforeSave', false);
-schema.path('email').validate(function (value) {
-    const validate = value.includes(_.lowerCase(req.body.company));
-});
-// profileSchema.plugin(mongoosePaginate);
+})
 
 const Profile = new mongoose.model("Profile", profileSchema);
 
@@ -74,7 +76,8 @@ app.route("/profiles")
         });
     })
     .post(function(req, res){
-
+        const company = req.body.company;
+        employeeCompany = company;
         const newProfile = new Profile({
             guid: req.body.guid,
             isActive: req.body.activity,
@@ -98,13 +101,10 @@ app.route("/profiles")
         });
         newProfile.save(function(err){
             if (!err){
-                res.send("Successfully added the new profile!");
+                res.send("Successfully added the profile!");
             }
             else{
                 res.send(err);
-            }
-            if (!req.body.email.includes(_.lowerCase(req.body.company))){
-                throw new Error("Invalid email");
             }
         });
     })
